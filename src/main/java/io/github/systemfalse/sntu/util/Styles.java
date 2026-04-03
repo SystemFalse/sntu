@@ -43,7 +43,7 @@ public class Styles {
         styles.put(DISPLAY_NAME, a -> a.fgBlue().a(Ansi.Attribute.ITALIC));
         styles.put(INTERFACE_NAME, Ansi::fgBlue);
         styles.put(MAC_ADDRESS, Ansi::fgMagenta);
-        styles.put(IP_ADDRESS, Ansi::fgBrightBlue);
+        styles.put(IP_ADDRESS, a -> a.fgBlue().a(Ansi.Attribute.UNDERLINE));
         styles.put(SUBNET_MASK, Ansi::fgCyan);
 
         styles.put(CONSTANT_TRUE, Ansi::fgGreen);
