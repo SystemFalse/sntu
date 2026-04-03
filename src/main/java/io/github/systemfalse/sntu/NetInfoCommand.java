@@ -3,7 +3,6 @@ package io.github.systemfalse.sntu;
 import io.github.systemfalse.sntu.util.Styles;
 import picocli.CommandLine;
 
-import java.io.PrintStream;
 import java.net.*;
 import java.util.LinkedList;
 import java.util.Optional;
@@ -39,59 +38,56 @@ public class NetInfoCommand implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        PrintStream out = Main.OUTPUT.orElse(System.out);
-        PrintStream err = Main.ERROR.orElse(System.err);
-
         Optional<NetworkInterface> anInterface = parent.getNetworkInterface(networkInterface);
-        anInterface.ifPresent(ni -> printInfo(out, ni, 0));
+        anInterface.ifPresent(ni -> printInfo(ni, 0));
 
         return 0;
     }
 
-    public void printInfo(PrintStream out, NetworkInterface ni, int index) {
+    public void printInfo(NetworkInterface ni, int index) {
         Styles styles = Styles.getInstance();
         String space = " ".repeat(index * 4);
-        out.println(ansi().a(space).apply(styles.section("Information:")));
-        out.println(ansi().a(space).apply(styles.subsection("Display name: ")).apply(styles.interfaceDisplayName(ni)));
-        out.println(ansi().a(space).apply(styles.subsection("Name: ")).apply(styles.interfaceName(ni)));
+        System.out.println(ansi().a(space).apply(styles.section("Information:")));
+        System.out.println(ansi().a(space).apply(styles.subsection("Display name: ")).apply(styles.interfaceDisplayName(ni)));
+        System.out.println(ansi().a(space).apply(styles.subsection("Name: ")).apply(styles.interfaceName(ni)));
         try {
             byte[] mac = ni.getHardwareAddress();
             if (mac != null) {
-                out.println(ansi().a(space).apply(styles.subsection("MAC address: ")).apply(styles.macAddress(mac)));
+                System.out.println(ansi().a(space).apply(styles.subsection("MAC address: ")).apply(styles.macAddress(mac)));
             }
         } catch (SocketException e) {
             //ignore
         }
         try {
-            out.println(ansi().a(space).apply(styles.subsection("MTU: ")).a(ni.getMTU()));
+            System.out.println(ansi().a(space).apply(styles.subsection("MTU: ")).a(ni.getMTU()));
         } catch (SocketException e) {
             //ignore
         }
         try {
             boolean isp2p = ni.isPointToPoint();
-            out.println(ansi().a(space).apply(styles.subsection("Point-to-point: ")).apply(styles.booleanType(isp2p)));
+            System.out.println(ansi().a(space).apply(styles.subsection("Point-to-point: ")).apply(styles.booleanType(isp2p)));
         } catch (SocketException e) {
             //ignore
         }
         try {
             boolean isLoopback = ni.isLoopback();
-            out.println(ansi().a(space).apply(styles.subsection("Loopback: ")).apply(styles.booleanType(isLoopback)));
+            System.out.println(ansi().a(space).apply(styles.subsection("Loopback: ")).apply(styles.booleanType(isLoopback)));
         } catch (SocketException e) {
             //ignore
         }
         {
             boolean isVirtual = ni.isVirtual();
-            out.println(ansi().a(space).apply(styles.subsection("Virtual: ")).apply(styles.booleanType(isVirtual)));
+            System.out.println(ansi().a(space).apply(styles.subsection("Virtual: ")).apply(styles.booleanType(isVirtual)));
         }
         try {
             boolean isUp = ni.isUp();
-            out.println(ansi().a(space).apply(styles.subsection("Up: ")).apply(styles.booleanType(isUp)));
+            System.out.println(ansi().a(space).apply(styles.subsection("Up: ")).apply(styles.booleanType(isUp)));
         } catch (SocketException e) {
             //ignore
         }
         try {
             boolean supportsMulticast = ni.supportsMulticast();
-            out.println(ansi().a(space).apply(styles.subsection("Supports multicast: ")).apply(styles.booleanType(supportsMulticast)));
+            System.out.println(ansi().a(space).apply(styles.subsection("Supports multicast: ")).apply(styles.booleanType(supportsMulticast)));
         } catch (SocketException e) {
             //ignore
         }
@@ -106,16 +102,16 @@ public class NetInfoCommand implements Callable<Integer> {
                 }
             }
             if (!masks.isEmpty()) {
-                out.println(ansi().apply(styles.subsection("Subnet masks:")));
-                masks.stream().distinct().forEach(out::print);
+                System.out.println(ansi().apply(styles.subsection("Subnet masks:")));
+                masks.stream().distinct().forEach(System.out::print);
             }
         }
         var si = ni.getSubInterfaces();
         if (si.hasMoreElements()) {
-            out.println(ansi().apply(styles.subsection("Subinterfaces:")));
+            System.out.println(ansi().apply(styles.subsection("Subinterfaces:")));
             while (si.hasMoreElements()) {
                 NetworkInterface subInterface = si.nextElement();
-                printInfo(out, subInterface, index + 1);
+                printInfo(subInterface, index + 1);
             }
         }
     }
