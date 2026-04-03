@@ -130,13 +130,13 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <imageName>ncb</imageName>
+                            <imageName>nstu</imageName>
                             <buildArgs>
                                 <buildArg>-march=compatibility</buildArg>
                                 <buildArg>--enable-http</buildArg>
                                 <buildArg>--enable-https</buildArg>
                                 <buildArg>--future-defaults=all</buildArg>
-                                <buildArg>-H:IncludeAllLocales</buildArg>
+                                <buildArg>-H:+IncludeAllLocales</buildArg>
                             </buildArgs>
                             <jvmArgs>--enable-native-access=ALL-UNNAMED</jvmArgs>
                             <quickBuild>true</quickBuild>
