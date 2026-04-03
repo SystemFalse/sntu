@@ -1,15 +1,13 @@
 package io.github.systemfalse.sntu;
 
+import io.github.systemfalse.sntu.util.Styles;
 import picocli.CommandLine;
 
-import java.io.PrintStream;
-import java.net.InetAddress;
 import java.net.NetworkInterface;
-import java.util.ArrayList;
-import java.util.InputMismatchException;
-import java.util.List;
-import java.util.Scanner;
+import java.util.Optional;
 import java.util.concurrent.Callable;
+
+import static org.fusesource.jansi.Ansi.ansi;
 
 @CommandLine.Command(
         name = "get-ip",
@@ -40,46 +38,16 @@ public class GetIpCommand implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        PrintStream out = Main.OUTPUT.orElse(System.out);
-        PrintStream err = Main.ERROR.orElse(System.err);
+        Styles styles = Styles.getInstance();
 
-        NetworkInterface anInterface;
-        if (networkInterface == null && parent.interactive) {
-            out.println("Select network interface:");
-            List<NetworkInterface> interfaces = new ArrayList<>();
-            parent.listInterfaces().forEach(interfaces::add);
-            for (int i = 0; i < interfaces.size(); i++) {
-                NetworkInterface ni = interfaces.get(i);
-                out.printf("%d: %s (%s)%n", i + 1, ni.getDisplayName(), ni.getName());
-            }
-            out.printf("%n0: Cancel%n");
-            Scanner sc = new Scanner(System.in, System.getProperty("stdin.encoding"));
-            int choice = -1;
-            do {
-                try {
-                    choice = sc.nextInt();
-                } catch (InputMismatchException _) {
-                    err.println("Invalid input");
-                }
-                if (choice < 0 || choice >= interfaces.size()) {
-                    err.println("Unsupported option");
-                }
-            } while (choice < 0 || choice >= interfaces.size());
-            if (choice == 0) {
-                return 0;
-            }
-            anInterface = interfaces.get(choice - 1);
-        } else if (networkInterface == null) {
-            err.println("Network interface not specified");
-            return 3;
-        } else {
-            anInterface = networkInterface;
+        Optional<NetworkInterface> anInterface = parent.getNetworkInterface(networkInterface);
+        if (anInterface.isEmpty()) {
+            return 0;
         }
-        out.printf("IPs:%n");
-        anInterface.inetAddresses()
+        System.out.println(ansi().apply(styles.section("IPs:")));
+        anInterface.get().inetAddresses()
                 .filter(parent.addressFilter())
-                .map(InetAddress::getHostAddress)
-                .forEach(out::println);
+                .forEach(ia -> System.out.println(ansi().apply(styles.ipAddress(ia))));
 
         return 0;
     }
