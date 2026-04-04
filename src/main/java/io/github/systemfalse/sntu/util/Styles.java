@@ -154,8 +154,11 @@ public class Styles {
         }
         BitSet bitMask = new BitSet(addressSize);
         bitMask.set(0, mask);
+        byte[] byteAddress = new byte[addressSize / Byte.SIZE];
+        byte[] byteMask = bitMask.toByteArray();
+        System.arraycopy(byteMask, 0, byteAddress, 0, byteMask.length);
         try {
-            return InetAddress.getByAddress(bitMask.toByteArray()).getHostAddress();
+            return InetAddress.getByAddress(byteAddress).getHostAddress();
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
