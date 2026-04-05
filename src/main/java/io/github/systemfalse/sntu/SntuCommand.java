@@ -1,9 +1,11 @@
 package io.github.systemfalse.sntu;
 
+import io.github.systemfalse.sntu.util.Styles;
 import picocli.CommandLine;
 
 import java.io.PrintStream;
 import java.net.*;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -15,7 +17,8 @@ import static org.fusesource.jansi.Ansi.ansi;
         header = "Simple Network Test Utility%n",
         version = "SNTU 0.0.1",
         subcommands = {
-                GetIpCommand.class
+                GetIpCommand.class,
+                NetInfoCommand.class
         },
         footer = {
                 "Use \"sntu -?, -h, or --help\" for this help message",
@@ -71,6 +74,49 @@ public class SntuCommand implements Callable<Integer> {
     public Predicate<InetAddress> addressFilter() {
         return ia -> ipo.ipv4() && ia instanceof Inet4Address ||
                 ipo.ipv6() && ia instanceof Inet6Address || ipo.ipv46();
+    }
+
+    public Optional<NetworkInterface> getNetworkInterface(NetworkInterface value)
+            throws SocketException {
+        Styles styles = Styles.getInstance();
+        if (value == null && interactive) {
+            return askInterface();
+        } else if (value == null) {
+            System.out.println(ansi().apply(styles.error("Network interface not specified")));
+            return Optional.empty();
+        } else {
+            return Optional.of(value);
+        }
+    }
+
+    public Optional<NetworkInterface> askInterface() throws SocketException {
+        Styles styles = Styles.getInstance();
+        System.out.println(ansi().apply(styles.userPrompt("Select network interface:")));
+        List<NetworkInterface> interfaces = new ArrayList<>();
+        listInterfaces().forEach(interfaces::add);
+        for (int i = 0; i < interfaces.size(); i++) {
+            NetworkInterface ni = interfaces.get(i);
+            System.out.println(ansi().a(i + 1).a(": ").apply(styles.interfaceDisplayName(ni)).a(" (")
+                    .apply(styles.interfaceName(ni)).a(')'));
+        }
+        System.out.printf("%n0: Cancel%n");
+        Scanner sc = new Scanner(System.in, System.getProperty("stdin.encoding"));
+        int choice = -1;
+        do {
+            try {
+                choice = sc.nextInt();
+            } catch (InputMismatchException _) {
+                System.out.println(ansi().apply(styles.error("Invalid input")));
+                continue;
+            }
+            if (choice < 0 || choice >= interfaces.size()) {
+                System.out.println(ansi().apply(styles.error("Unsupported option")));
+            }
+        } while (choice < 0 || choice >= interfaces.size());
+        if (choice == 0) {
+            return Optional.empty();
+        }
+        return Optional.of(interfaces.get(choice - 1));
     }
 
     private static CommandLine.Help.ColorScheme colorScheme() {
