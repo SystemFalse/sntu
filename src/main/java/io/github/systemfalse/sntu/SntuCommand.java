@@ -3,7 +3,6 @@ package io.github.systemfalse.sntu;
 import io.github.systemfalse.sntu.util.Styles;
 import picocli.CommandLine;
 
-import java.io.PrintStream;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -27,6 +26,7 @@ import static org.fusesource.jansi.Ansi.ansi;
         }
 )
 public class SntuCommand implements Callable<Integer> {
+    @SuppressWarnings("unused")
     @CommandLine.Option(
             names = {"-h", "-?", "--help"},
             usageHelp = true,
@@ -34,6 +34,7 @@ public class SntuCommand implements Callable<Integer> {
     )
     private boolean help;
 
+    @SuppressWarnings("unused")
     @CommandLine.Option(
             names = {"-V", "--version"},
             versionHelp = true,
@@ -41,6 +42,7 @@ public class SntuCommand implements Callable<Integer> {
     )
     private boolean version;
 
+    @SuppressWarnings("unused")
     @CommandLine.Option(
             names = "--list-interfaces",
             description = "List all network interfaces and exit"
@@ -68,7 +70,8 @@ public class SntuCommand implements Callable<Integer> {
         Styles styles = Styles.getInstance();
 
         if (listInterfaces) {
-            listInterfaces().forEach(ni -> System.out.println(ansi().apply(styles.interfaceDisplayName(ni)).a(" (").apply(styles.interfaceName(ni)).a(')')));
+            listInterfaces().forEach(ni -> System.out.println(ansi().apply(styles
+                    .interfaceDisplayName(ni)).a(" (").apply(styles.interfaceName(ni)).a(')')));
         }
         return 0;
     }

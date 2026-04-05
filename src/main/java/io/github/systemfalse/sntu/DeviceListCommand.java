@@ -28,6 +28,7 @@ import static org.fusesource.jansi.Ansi.ansi;
         }
 )
 public class DeviceListCommand implements Callable<Integer> {
+    @SuppressWarnings("unused")
     @CommandLine.Option(
             names = {"-h", "-?", "--help"},
             usageHelp = true,
@@ -35,14 +36,16 @@ public class DeviceListCommand implements Callable<Integer> {
     )
     private boolean help;
 
+    @SuppressWarnings("unused")
     @CommandLine.ParentCommand
     private SntuCommand parent;
 
+    @SuppressWarnings("unused")
     @CommandLine.Option(
             names = {"-n", "--network-interface"},
             description = "Network interface to use"
     )
-    NetworkInterface networkInterface;
+    private NetworkInterface networkInterface;
 
     @CommandLine.Option(
             names = {"-t", "--timeout"},
@@ -72,7 +75,8 @@ public class DeviceListCommand implements Callable<Integer> {
         var addresses = ni.getInterfaceAddresses();
         if (parent.ipo.ipv4() || parent.ipo.ipv46()) {
             System.out.println(ansi().a(System.lineSeparator()).apply(styles.section("IPv4 devices:")));
-            addresses.stream().filter(address -> address.getAddress() instanceof Inet4Address).forEach(ia -> {
+            addresses.stream().filter(address -> address.getAddress() instanceof Inet4Address)
+                    .forEach(ia -> {
                 LinkedList<String> reachable = new LinkedList<>();
                 AtomicBoolean process = new AtomicBoolean(true);
                 int deviceBitsLength = 32 - ia.getNetworkPrefixLength();
@@ -81,17 +85,13 @@ public class DeviceListCommand implements Callable<Integer> {
                     System.out.println(ansi().apply(styles.info("Too many devices to scan, skipping")));
                     return;
                 }
-                try (ExecutorService executor = Executors.newWorkStealingPool()) {
-                    CompletableFuture.runAsync(() -> {
-                        while (process.get()) {
-                            try {
-                                Thread.sleep(200);
-                            } catch (InterruptedException _) {
-                                break;
-                            }
+                try (ExecutorService executor = Executors.newWorkStealingPool(); ScheduledExecutorService scheduler =
+                        Executors.newSingleThreadScheduledExecutor()) {
+                    scheduler.scheduleAtFixedRate(() -> {
+                        if (process.get()) {
                             printProcess();
                         }
-                    });
+                    }, 0, 200, TimeUnit.MILLISECONDS);
                     byte[] netAddress = getNetworkAddress(ia);
                     var futures = executor.invokeAll(createV4ReachabilityTest(ni, ia, netAddress));
                     futures.forEach(f -> {
@@ -126,7 +126,8 @@ public class DeviceListCommand implements Callable<Integer> {
 
     private record ConnectionResult(int deviceId, InetAddress address, boolean success, ConnectionException exception) {}
 
-    private ArrayList<Callable<ConnectionResult>> createV4ReachabilityTest(NetworkInterface ni, InterfaceAddress ia, byte[] netAddress) {
+    private ArrayList<Callable<ConnectionResult>> createV4ReachabilityTest(NetworkInterface ni, InterfaceAddress ia,
+                                                                           byte[] netAddress) {
         int deviceBitCount = 32 - ia.getNetworkPrefixLength();
         final int broadcast = (1 << deviceBitCount) - 1;
         ArrayList<Callable<ConnectionResult>> reachable = new ArrayList<>();
@@ -138,7 +139,8 @@ public class DeviceListCommand implements Callable<Integer> {
                 try {
                     return new ConnectionResult(deviceId, deviceAddress, deviceAddress.isReachable(ni, 0, timeout), null);
                 } catch (IOException e) {
-                    return new ConnectionResult(deviceId, deviceAddress, false, new ConnectionException(e.getMessage(), deviceAddress));
+                    return new ConnectionResult(deviceId, deviceAddress, false, new ConnectionException(
+                            e.getMessage(), deviceAddress));
                 }
             });
         }

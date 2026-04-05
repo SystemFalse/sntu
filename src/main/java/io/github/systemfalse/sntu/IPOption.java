@@ -3,18 +3,21 @@ package io.github.systemfalse.sntu;
 import picocli.CommandLine;
 
 public class IPOption {
+    @SuppressWarnings("unused")
     @CommandLine.Option(
             names = "-4",
             description = "Use only IPv4"
     )
     private boolean ipv4;
 
+    @SuppressWarnings("unused")
     @CommandLine.Option(
             names = "-6",
             description = "Use only IPv6"
     )
     private boolean ipv6;
 
+    @SuppressWarnings("unused")
     @CommandLine.Option(
             names = "-46",
             description = "Use both IPv4 and IPv6 (default)",
