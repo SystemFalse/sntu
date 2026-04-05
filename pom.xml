@@ -45,7 +45,7 @@
     </dependencies>
 
     <build>
-        <finalName>nstu</finalName>
+        <finalName>sntu</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -130,12 +130,13 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <imageName>nstu</imageName>
+                            <imageName>sntu</imageName>
                             <buildArgs>
                                 <buildArg>-march=compatibility</buildArg>
                                 <buildArg>--enable-http</buildArg>
                                 <buildArg>--enable-https</buildArg>
                                 <buildArg>--future-defaults=all</buildArg>
+                                <buildArg>-H:+UnlockExperimentalVMOptions</buildArg>
                                 <buildArg>-H:+IncludeAllLocales</buildArg>
                                 <buildArg>-H:+AddAllCharsets</buildArg>
                             </buildArgs>

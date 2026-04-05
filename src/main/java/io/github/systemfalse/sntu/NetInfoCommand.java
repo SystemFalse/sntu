@@ -20,6 +20,7 @@ import static org.fusesource.jansi.Ansi.ansi;
         }
 )
 public class NetInfoCommand implements Callable<Integer> {
+    @SuppressWarnings("unused")
     @CommandLine.Option(
             names = {"-h", "-?", "--help"},
             usageHelp = true,
@@ -27,14 +28,16 @@ public class NetInfoCommand implements Callable<Integer> {
     )
     private boolean help;
 
+    @SuppressWarnings("unused")
     @CommandLine.ParentCommand
     private SntuCommand parent;
 
+    @SuppressWarnings("unused")
     @CommandLine.Option(
             names = {"-n", "--network-interface"},
             description = "Network interface to use"
     )
-    NetworkInterface networkInterface;
+    private NetworkInterface networkInterface;
 
     @Override
     public Integer call() throws Exception {
@@ -87,7 +90,8 @@ public class NetInfoCommand implements Callable<Integer> {
         }
         try {
             boolean supportsMulticast = ni.supportsMulticast();
-            System.out.println(ansi().a(space).apply(styles.subsection("Supports multicast: ")).apply(styles.booleanType(supportsMulticast)));
+            System.out.println(ansi().a(space).apply(styles.subsection("Supports multicast: ")).apply(styles
+                    .booleanType(supportsMulticast)));
         } catch (SocketException e) {
             //ignore
         }
@@ -96,9 +100,11 @@ public class NetInfoCommand implements Callable<Integer> {
             LinkedList<String> masks = new LinkedList<>();
             for (InterfaceAddress ia : ias) {
                 if (ia.getAddress() instanceof Inet4Address) {
-                    masks.add(ansi().a(space).apply(styles.subsection2("IPv4 mask: ")).apply(styles.subnetMask(ia)).newline().toString());
+                    masks.add(ansi().a(space).apply(styles.subsection2("IPv4 mask: ")).apply(styles.subnetMask(ia))
+                            .newline().toString());
                 } else if (ia.getAddress() instanceof Inet6Address) {
-                    masks.add(ansi().a(space).apply(styles.subsection2("IPv6 mask: ")).apply(styles.subnetMask(ia)).newline().toString());
+                    masks.add(ansi().a(space).apply(styles.subsection2("IPv6 mask: ")).apply(styles.subnetMask(ia))
+                            .newline().toString());
                 }
             }
             if (!masks.isEmpty()) {

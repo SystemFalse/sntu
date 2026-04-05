@@ -18,6 +18,7 @@ public class Styles {
     public static final String MAC_ADDRESS = "mac-address";
     public static final String IP_ADDRESS = "ip-address";
     public static final String SUBNET_MASK = "subnet-mask";
+    public static final String HOST_NAME = "host-name";
 
     //constants
     public static final String CONSTANT_TRUE = "true";
@@ -45,6 +46,7 @@ public class Styles {
         styles.put(MAC_ADDRESS, Ansi::fgMagenta);
         styles.put(IP_ADDRESS, a -> a.fgBlue().a(Ansi.Attribute.UNDERLINE));
         styles.put(SUBNET_MASK, Ansi::fgCyan);
+        styles.put(HOST_NAME, a -> a.fgMagenta().a(Ansi.Attribute.ITALIC));
 
         styles.put(CONSTANT_TRUE, Ansi::fgGreen);
         styles.put(CONSTANT_FALSE, Ansi::fgRed);
@@ -106,6 +108,10 @@ public class Styles {
         } else if (address.getAddress() instanceof Inet6Address) {
             return ansi -> applyStyle(ansi, SUBNET_MASK).a(maskToString(mask, 128)).reset();
         } else return _ -> {};
+    }
+
+    public Ansi.Consumer hostName(InetAddress address) {
+        return ansi -> applyStyle(ansi, HOST_NAME).a(address.getHostName()).reset();
     }
 
     public Ansi.Consumer userPrompt(String prompt) {

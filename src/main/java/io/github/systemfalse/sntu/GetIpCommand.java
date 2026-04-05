@@ -20,6 +20,7 @@ import static org.fusesource.jansi.Ansi.ansi;
         }
 )
 public class GetIpCommand implements Callable<Integer> {
+    @SuppressWarnings("unused")
     @CommandLine.Option(
             names = {"-h", "-?", "--help"},
             usageHelp = true,
@@ -27,14 +28,16 @@ public class GetIpCommand implements Callable<Integer> {
     )
     private boolean help;
 
+    @SuppressWarnings("unused")
     @CommandLine.ParentCommand
     private SntuCommand parent;
 
+    @SuppressWarnings("unused")
     @CommandLine.Option(
             names = {"-n", "--network-interface"},
             description = "Network interface to use"
     )
-    NetworkInterface networkInterface;
+    private NetworkInterface networkInterface;
 
     @Override
     public Integer call() throws Exception {
