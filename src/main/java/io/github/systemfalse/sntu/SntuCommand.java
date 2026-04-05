@@ -18,7 +18,8 @@ import static org.fusesource.jansi.Ansi.ansi;
         version = "SNTU 0.0.1",
         subcommands = {
                 GetIpCommand.class,
-                NetInfoCommand.class
+                NetInfoCommand.class,
+                DeviceListCommand.class
         },
         footer = {
                 "Use \"sntu -?, -h, or --help\" for this help message",
@@ -56,6 +57,12 @@ public class SntuCommand implements Callable<Integer> {
     )
     boolean interactive;
 
+    @CommandLine.Option(
+            names = "-1",
+            description = "Use default interface"
+    )
+    boolean useDefaultInterface;
+
     @Override
     public Integer call() throws Exception {
         PrintStream out = Main.OUTPUT.orElse(System.out);
@@ -79,8 +86,10 @@ public class SntuCommand implements Callable<Integer> {
     public Optional<NetworkInterface> getNetworkInterface(NetworkInterface value)
             throws SocketException {
         Styles styles = Styles.getInstance();
-        if (value == null && interactive) {
+        if (value == null && interactive && !useDefaultInterface) {
             return askInterface();
+        } else if (value == null && useDefaultInterface) {
+            return listInterfaces().findFirst();
         } else if (value == null) {
             System.out.println(ansi().apply(styles.error("Network interface not specified")));
             return Optional.empty();
@@ -91,7 +100,6 @@ public class SntuCommand implements Callable<Integer> {
 
     public Optional<NetworkInterface> askInterface() throws SocketException {
         Styles styles = Styles.getInstance();
-        System.out.println(ansi().apply(styles.userPrompt("Select network interface:")));
         List<NetworkInterface> interfaces = new ArrayList<>();
         listInterfaces().forEach(interfaces::add);
         for (int i = 0; i < interfaces.size(); i++) {
@@ -99,7 +107,8 @@ public class SntuCommand implements Callable<Integer> {
             System.out.println(ansi().a(i + 1).a(": ").apply(styles.interfaceDisplayName(ni)).a(" (")
                     .apply(styles.interfaceName(ni)).a(')'));
         }
-        System.out.printf("%n0: Cancel%n");
+        System.out.printf("0: Cancel%n");
+        System.out.print(ansi().apply(styles.userPrompt("Select network interface: ")));
         Scanner sc = new Scanner(System.in, System.getProperty("stdin.encoding"));
         int choice = -1;
         do {
