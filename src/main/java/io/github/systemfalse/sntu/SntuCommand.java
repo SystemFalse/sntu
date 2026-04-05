@@ -65,10 +65,10 @@ public class SntuCommand implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        PrintStream out = Main.OUTPUT.orElse(System.out);
+        Styles styles = Styles.getInstance();
 
         if (listInterfaces) {
-            listInterfaces().forEach(ni -> out.println(ansi().render("%s (@|yellow,bold %s|@)", ni.getDisplayName(), ni.getName())));
+            listInterfaces().forEach(ni -> System.out.println(ansi().apply(styles.interfaceDisplayName(ni)).a(" (").apply(styles.interfaceName(ni)).a(')')));
         }
         return 0;
     }
